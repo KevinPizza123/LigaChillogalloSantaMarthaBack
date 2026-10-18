@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📑 Historial de Vocalías Realizadas</h1>
+            <p class="text-xs text-gray-500">Selecciona el acta de cualquier partido jugado para revisarla o imprimirla.</p>
+        </div>
+    </div>
+    
+    <div class="space-y-4">
+        {% for p in partidos %}
+            <div class="bg-white p-5 rounded-xl shadow border border-gray-200">
+                <div class="flex justify-between items-center border-b pb-2 mb-3">
+                    <span class="text-xs font-bold text-gray-500">
+                        Fecha {{ p.fecha_numero }} — {{ p.genero }} | 📅 {{ p.dia_juego }} ({{ p.hora_inicio }} - {{ p.hora_fin }})
+                    </span>
+                    <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">
+                        Finalizado
+                    </span>
+                </div>
+                
+                <div class="flex justify-around items-center text-center my-3">
+                    <div class="w-2/5 font-bold text-lg text-gray-800">{{ p.equipo_local.nombre }}</div>
+                    <div class="bg-slate-900 text-white font-black text-2xl px-5 py-1.5 rounded-lg shadow">
+                        {{ p.goles_local }} - {{ p.goles_visitante }}
+                    </div>
+                    <div class="w-2/5 font-bold text-lg text-gray-800">{{ p.equipo_visitante.nombre }}</div>
+                </div>
+
+                <div class="flex justify-between items-center border-t pt-3 mt-3">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs text-gray-600">
+                        <div><b>Árbitro:</b> {{ p.arbitro.nombre if p.arbitro else 'N/A' }}</div>
+                        <div><b>Vocalía:</b> {{ p.equipo_vocal.nombre }}</div>
+                        <div><b>Multas:</b> Local (${{ "%.2f"|format(p.multa_local) }}) / Vis (${{ "%.2f"|format(p.multa_visitante) }})</div>
+                    </div>
+
+                    <!-- BOTÓN PARA SELECCIONAR E IMPRIMIR ESTE ACTA EN PDF -->
+                    <a href="{{ url_for('ver_acta_pdf', partido_id=p.id) }}" 
+                       class="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-1 transition">
+                        🖨 Imprimir / Ver PDF
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="bg-white p-8 rounded-xl text-center text-gray-500 shadow border">
+                Aún no hay vocalías ni actas registradas.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

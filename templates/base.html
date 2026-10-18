@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liga de Fútbol Barrial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col font-sans">
+    <nav class="bg-blue-900 text-white shadow-md">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="/" class="text-xl font-bold flex items-center gap-2">⚽ Liga Barrial</a>
+        <div class="space-x-4 flex items-center">
+            <a href="/tablas" class="hover:text-blue-200 transition font-semibold text-sm">📊 Tablas</a>
+<a href="/goleadores" class="hover:text-blue-200 transition font-semibold text-sm">⚽ Goleadores</a>
+<a href="/vocalias/realizadas" class="hover:text-blue-200 transition font-semibold text-sm">📋 Actas Realizadas</a>
+            {% if session.get('username') %}
+                <a href="/vocalia" class="hover:text-blue-200 transition font-semibold text-sm">📝 Vocalías</a>
+                {% if session.get('rol') == 'admin' %}
+                    <a href="/admin" class="hover:text-blue-200 transition font-semibold text-sm">Panel Admin</a>
+                    <a href="/admin/calendario" class="hover:text-blue-200 transition font-semibold text-sm">🗓 Calendario</a>
+                    <a href="/admin/arbitros" class="hover:text-blue-200 transition font-semibold text-sm">🏁 Árbitros</a>
+                {% endif %}
+                <span class="text-xs bg-blue-800 px-3 py-1 rounded-full">👤 {{ session['username'] }}</span>
+                <a href="/logout" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs font-bold">Salir</a>
+            {% else %}
+                <a href="/login" class="bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded text-xs font-bold">Iniciar Sesión</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+    <div class="container mx-auto px-4 mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-4 mb-4 text-sm rounded-lg shadow {% if category == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="container mx-auto px-4 py-6 flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 text-center py-4 text-sm mt-auto">
+        &copy; 2026 Sistema de Gestión de Liga Barrial - Fútbol 7
+    </footer>
+</body>
+</html>

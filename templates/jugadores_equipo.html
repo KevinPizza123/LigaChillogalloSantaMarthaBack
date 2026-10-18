@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <a href="/admin" class="text-blue-600 font-bold text-sm">← Volver al Panel</a>
+        <h1 class="text-3xl font-bold text-gray-800 mt-1">🛡 {{ equipo.nombre }}</h1>
+    </div>
+    <span class="bg-blue-100 text-blue-800 font-bold px-4 py-2 rounded-full text-sm">Total: {{ jugadores|length }}</span>
+</div>
+<div class="bg-white rounded-xl shadow border overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-gray-100 uppercase text-xs border-b">
+                <th class="px-6 py-4">Nombre</th>
+                <th class="px-6 py-4">Cédula</th>
+                <th class="px-6 py-4 text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y text-sm">
+            {% for j in jugadores %}
+                <tr>
+                    <form action="{{ url_for('editar_jugador', jugador_id=j.id) }}" method="POST">
+                        <td class="px-6 py-3"><input type="text" name="nombre" value="{{ j.nombre }}" class="border px-2 py-1 rounded w-full"></td>
+                        <td class="px-6 py-3"><input type="text" name="cedula" value="{{ j.cedula }}" class="border px-2 py-1 rounded w-full"></td>
+                        <td class="px-6 py-3 flex justify-center gap-2">
+                            <button type="submit" class="bg-amber-500 text-white text-xs px-3 py-1.5 rounded font-bold">💾 Guardar</button>
+                    </form>
+                    <form action="{{ url_for('eliminar_jugador', jugador_id=j.id) }}" method="POST" onsubmit="return confirm('¿Eliminar jugador?');">
+                        <button type="submit" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded font-bold">🗑 Eliminar</button>
+                    </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Sin jugadores inscritos.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

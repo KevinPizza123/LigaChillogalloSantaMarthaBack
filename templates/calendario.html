@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center flex-wrap gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">🗓 Calendario de Partidos</h1>
+        <p class="text-xs text-gray-500">Crea manualmente los encuentros o usa el generador automático.</p>
+    </div>
+    
+    <!-- GENERACIÓN AUTOMÁTICA OPCIONAL -->
+    <div class="flex gap-2">
+        <form action="{{ url_for('crear_partido_manual') }}" method="POST" onsubmit="return confirm('¿Reestablecer todo el calendario Masculino?');">
+            <input type="hidden" name="genero" value="Masculino">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded shadow">
+                ⚡ Auto Masculino
+            </button>
+        </form>
+        <form action="{{ url_for('crear_partido_manual') }}" method="POST" onsubmit="return confirm('¿Reestablecer todo el calendario Femenino?');">
+            <input type="hidden" name="genero" value="Femenino">
+            <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs px-3 py-2 rounded shadow">
+                ⚡ Auto Femenino
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- FORMULARIO DE CREACIÓN MANUAL DE PARTIDO COMPLETO -->
+<div class="bg-white p-5 rounded-xl shadow border border-gray-200 mb-8">
+    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2 flex items-center gap-2">
+        ➕ Programar Partido Manualmente
+    </h2>
+    
+    <form action="{{ url_for('crear_partido_manual') }}" method="POST" class="space-y-4 text-xs font-bold">
+        
+        <!-- PRIMERA FILA: FECHA, CATEGORÍA, DÍA Y HORARIOS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            <div>
+                <label class="block text-gray-700 mb-1">N° Fecha</label>
+                <input type="number" name="fecha_numero" min="1" value="1" required 
+                       class="w-full p-2 border rounded-lg font-bold text-center">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1">Categoría</label>
+                <select name="genero" id="select_genero" required onchange="cambiarEquiposCategoria()" 
+                        class="w-full p-2 border rounded-lg">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                </select>
+            </div>
+
+            <div>
+    <label class="block text-gray-700 mb-1">Día de Juego</label>
+    <input type="date" name="dia_juego" required class="w-full p-2 border rounded-lg">
+</div>
+
+            <div>
+                <label class="block text-gray-700 mb-1">Hora Inicio</label>
+                <input type="time" name="hora_inicio" required class="w-full p-2 border rounded-lg">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1">Hora Fin</label>
+                <input type="time" name="hora_fin" required class="w-full p-2 border rounded-lg">
+            </div>
+        </div>
+
+        <!-- SEGUNDA FILA: EQUIPOS Y ÁRBITRO -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            <div>
+                <label class="block text-gray-700 mb-1">Equipo Local</label>
+                <select name="equipo_local_id" id="select_local" required class="w-full p-2 border rounded-lg">
+                    {% for eq in equipos_masc %}
+                        <option value="{{ eq.id }}">{{ eq.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1">Equipo Visitante</label>
+                <select name="equipo_visitante_id" id="select_visitante" required class="w-full p-2 border rounded-lg">
+                    {% for eq in equipos_masc %}
+                        <option value="{{ eq.id }}">{{ eq.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1">Equipo Vocal</label>
+                <select name="equipo_vocal_id" id="select_vocal" required class="w-full p-2 border rounded-lg">
+                    {% for eq in equipos_masc %}
+                        <option value="{{ eq.id }}">{{ eq.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 mb-1">Árbitro</label>
+                <select name="arbitro_id" class="w-full p-2 border rounded-lg">
+                    <option value="">-- Por Asignar --</option>
+                    {% for arb in arbitros %}
+                        <option value="{{ arb.id }}">{{ arb.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition">
+                    💾 Programar Partido
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<!-- LISTADO DE PARTIDOS REGISTRADOS -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- CATEGORÍA MASCULINA -->
+    <div>
+        <h2 class="text-xl font-bold text-blue-800 mb-4 border-b pb-2">👔 Categoría Masculina</h2>
+        {% for f in fechas_masc %}
+            <div class="bg-white rounded-xl shadow border mb-4 overflow-hidden">
+                <div class="bg-blue-800 text-white px-4 py-2 font-bold text-xs">FECHA {{ f }}</div>
+                <div class="divide-y divide-gray-100">
+                    {% for p in partidos_masc if p.fecha_numero == f %}
+                        <div class="p-3 text-sm flex justify-between items-center">
+                            <span class="w-2/5 text-right font-bold text-gray-700">{{ p.equipo_local.nombre }}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-500">VS</span>
+                            <span class="w-2/5 text-left font-bold text-gray-700">{{ p.equipo_visitante.nombre }}</span>
+                            
+                            <!-- Botón Eliminar -->
+                            <form action="{{ url_for('eliminar_partido', partido_id=p.id) }}" method="POST" onsubmit="return confirm('¿Borrar partido?');">
+                                <button type="submit" class="text-red-500 hover:text-red-700 font-bold text-xs ml-2">🗑</button>
+                            </form>
+                        </div>
+                        <div class="text-center text-xs text-gray-600 bg-amber-50 py-1.5 border-t flex justify-around flex-wrap gap-1">
+    <span>📅 <b>{{ p.dia_juego }}</b> ({{ p.hora_inicio }} - {{ p.hora_fin }})</span>
+    <span>Mesa: <b>{{ p.equipo_vocal.nombre }}</b></span>
+    <span>Árbitro: <b>{{ p.arbitro.nombre if p.arbitro else 'Por asignar' }}</b></span>
+</div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p class="text-xs text-gray-400 italic">No hay partidos masculinos creados.</p>
+        {% endfor %}
+    </div>
+
+    <!-- CATEGORÍA FEMENINA -->
+    <div>
+        <h2 class="text-xl font-bold text-pink-700 mb-4 border-b pb-2">👚 Categoría Femenina</h2>
+        {% for f in fechas_fem %}
+            <div class="bg-white rounded-xl shadow border mb-4 overflow-hidden">
+                <div class="bg-pink-700 text-white px-4 py-2 font-bold text-xs">FECHA {{ f }}</div>
+                <div class="divide-y divide-gray-100">
+                    {% for p in partidos_fem if p.fecha_numero == f %}
+                        <div class="p-3 text-sm flex justify-between items-center">
+                            <span class="w-2/5 text-right font-bold text-gray-700">{{ p.equipo_local.nombre }}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-500">VS</span>
+                            <span class="w-2/5 text-left font-bold text-gray-700">{{ p.equipo_visitante.nombre }}</span>
+                            
+                            <!-- Botón Eliminar -->
+                            <form action="{{ url_for('eliminar_partido', partido_id=p.id) }}" method="POST" onsubmit="return confirm('¿Borrar partido?');">
+                                <button type="submit" class="text-red-500 hover:text-red-700 font-bold text-xs ml-2">🗑</button>
+                            </form>
+                        </div>
+                        <<div class="text-center text-xs text-gray-600 bg-amber-50 py-1.5 border-t flex justify-around flex-wrap gap-1">
+    <span>📅 <b>{{ p.dia_juego }}</b> ({{ p.hora_inicio }} - {{ p.hora_fin }})</span>
+    <span>Mesa: <b>{{ p.equipo_vocal.nombre }}</b></span>
+    <span>Árbitro: <b>{{ p.arbitro.nombre if p.arbitro else 'Por asignar' }}</b></span>
+</div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p class="text-xs text-gray-400 italic">No hay partidos femeninos creados.</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- SCRIPT PARA CAMBIAR LISTA DE EQUIPOS SEGÚN CATEGORÍA SELECCIONADA -->
+<script id="datos-equipos" 
+        data-masc='{{ json_masc|tojson if json_masc is defined else "[]" }}' 
+        data-fem='{{ json_fem|tojson if json_fem is defined else "[]" }}'>
+
+const scriptTag = document.getElementById('datos-equipos');
+const eqMasc = JSON.parse(scriptTag.dataset.masc);
+const eqFem = JSON.parse(scriptTag.dataset.fem);
+
+function cambiarEquiposCategoria() {
+    const gen = document.getElementById('select_genero').value;
+    const lista = (gen === 'Masculino') ? eqMasc : eqFem;
+    
+    const selects = ['select_local', 'select_visitante', 'select_vocal'];
+    
+    selects.forEach(sId => {
+        const select = document.getElementById(sId);
+        if (select) {
+            select.innerHTML = '';
+            lista.forEach(eq => {
+                const opt = document.createElement('option');
+                opt.value = eq.id;
+                opt.textContent = eq.nombre;
+                select.appendChild(opt);
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

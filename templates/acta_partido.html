@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-5xl mx-auto mb-10">
+    <form action="{{ url_for('guardar_acta', partido_id=partido.id) }}" method="POST" class="space-y-6">
+        
+        <!-- DATOS DEL PARTIDO -->
+        <div class="bg-white p-6 rounded-xl shadow border">
+            <h1 class="text-2xl font-black mb-4 text-gray-800">📋 Acta Oficial de Vocalía (Fútbol 7)</h1>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-bold">
+                <div>
+                    <label class="block text-gray-600 mb-1">Día / Fecha</label>
+                    <input type="date" name="dia_juego" value="{{ partido.dia_juego }}" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Hora Inicio</label>
+                    <input type="time" name="hora_inicio" value="{{ partido.hora_inicio }}" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Hora Fin</label>
+                    <input type="time" name="hora_fin" value="{{ partido.hora_fin }}" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Árbitro Asignado</label>
+                    <div class="p-2 border rounded bg-gray-50 text-gray-800 font-bold">
+                        {{ partido.arbitro.nombre if partido.arbitro else 'Sin Árbitro' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MARCADOR GLOBAL DEL PARTIDO -->
+        <div class="bg-slate-900 text-white p-6 rounded-xl text-center flex justify-around items-center shadow">
+            <div class="w-2/5">
+                <h2 class="font-bold text-lg md:text-xl mb-2">{{ partido.equipo_local.nombre }}</h2>
+                <input type="number" name="goles_local" min="0" value="{{ partido.goles_local }}" required class="w-20 text-center text-3xl font-black p-2 rounded text-black bg-white">
+            </div>
+            <div class="font-black text-2xl text-gray-400">VS</div>
+            <div class="w-2/5">
+                <h2 class="font-bold text-lg md:text-xl mb-2">{{ partido.equipo_visitante.nombre }}</h2>
+                <input type="number" name="goles_visitante" min="0" value="{{ partido.goles_visitante }}" required class="w-20 text-center text-3xl font-black p-2 rounded text-black bg-white">
+            </div>
+        </div>
+
+        <!-- PLANILLAS Y ESTADÍSTICAS INDIVIDUALES POR JUGADOR -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- LOCAL -->
+            <div class="bg-white p-5 rounded-xl shadow border">
+                <h3 class="font-bold text-gray-800 border-b pb-2 mb-3">Plantilla: {{ partido.equipo_local.nombre }}</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-600 border-b">
+                                <th class="p-2">Jugador</th>
+                                <th class="p-1 text-center">Rol</th>
+                                <th class="p-1 text-center">Goles</th>
+                                <th class="p-1 text-center">🟨</th>
+                                <th class="p-1 text-center">🟥</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            {% for j in jug_local %}
+                                <tr>
+                                    <td class="p-2 font-medium">{{ j.nombre }}</td>
+                                    <td class="p-1 text-center">
+                                        <select class="border rounded p-0.5 text-xs">
+                                            <option value="T">Titular (7)</option>
+                                            <option value="S">Suplente (5)</option>
+                                        </select>
+                                    </td>
+                                    <td class="p-1 text-center">
+                                        <input type="number" name="goles_jugador_{{ j.id }}" min="0" value="0" class="w-12 text-center border rounded font-bold">
+                                    </td>
+                                    <td class="p-1 text-center"><input type="checkbox" class="rounded text-amber-500"></td>
+                                    <td class="p-1 text-center"><input type="checkbox" class="rounded text-red-600"></td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="5" class="p-2 text-gray-400 italic">Sin jugadores inscritos</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VISITANTE -->
+            <div class="bg-white p-5 rounded-xl shadow border">
+                <h3 class="font-bold text-gray-800 border-b pb-2 mb-3">Plantilla: {{ partido.equipo_visitante.nombre }}</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-600 border-b">
+                                <th class="p-2">Jugador</th>
+                                <th class="p-1 text-center">Rol</th>
+                                <th class="p-1 text-center">Goles</th>
+                                <th class="p-1 text-center">🟨</th>
+                                <th class="p-1 text-center">🟥</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            {% for j in jug_vis %}
+                                <tr>
+                                    <td class="p-2 font-medium">{{ j.nombre }}</td>
+                                    <td class="p-1 text-center">
+                                        <select class="border rounded p-0.5 text-xs">
+                                            <option value="T">Titular (7)</option>
+                                            <option value="S">Suplente (5)</option>
+                                        </select>
+                                    </td>
+                                    <td class="p-1 text-center">
+                                        <input type="number" name="goles_jugador_{{ j.id }}" min="0" value="0" class="w-12 text-center border rounded font-bold">
+                                    </td>
+                                    <td class="p-1 text-center"><input type="checkbox" class="rounded text-amber-500"></td>
+                                    <td class="p-1 text-center"><input type="checkbox" class="rounded text-red-600"></td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="5" class="p-2 text-gray-400 italic">Sin jugadores inscritos</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONTROL DE CAMBIOS DE JUGADORES (HASTA 5 CAMBIOS) -->
+        <div class="bg-white p-5 rounded-xl shadow border">
+            <h3 class="font-bold text-gray-800 border-b pb-3 mb-3 text-sm">🔄 Control de Cambios (Entra / Sale)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                
+                <!-- CAMBIOS LOCAL -->
+                <div>
+                    <h4 class="font-bold text-blue-800 mb-2">{{ partido.equipo_local.nombre }}</h4>
+                    <div class="space-y-2">
+                        <div class="flex gap-2 items-center">
+                            <span class="text-gray-400 font-bold">1.</span>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Entra --</option>{% for j in jug_local %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Sale --</option>{% for j in jug_local %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-gray-400 font-bold">2.</span>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Entra --</option>{% for j in jug_local %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Sale --</option>{% for j in jug_local %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAMBIOS VISITANTE -->
+                <div>
+                    <h4 class="font-bold text-pink-700 mb-2">{{ partido.equipo_visitante.nombre }}</h4>
+                    <div class="space-y-2">
+                        <div class="flex gap-2 items-center">
+                            <span class="text-gray-400 font-bold">1.</span>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Entra --</option>{% for j in jug_vis %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Sale --</option>{% for j in jug_vis %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-gray-400 font-bold">2.</span>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Entra --</option>{% for j in jug_vis %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                            <select class="w-1/2 p-1 border rounded"><option value="">-- Sale --</option>{% for j in jug_vis %}<option>{{ j.nombre }}</option>{% endfor %}</select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TOTAL MULTAS Y TARJETAS DEL EQUIPO -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-5 rounded-xl shadow border">
+                <h3 class="font-bold border-b pb-2 mb-3 text-sm">Resumen Tarjetas: {{ partido.equipo_local.nombre }}</h3>
+                <div class="grid grid-cols-2 gap-4 text-xs font-bold">
+                    <div>
+                        <label class="text-amber-600">🟨 Amarillas ($0.50 c/u)</label>
+                        <input type="number" name="amarillas_local" min="0" value="{{ partido.amarillas_local }}" class="w-full border p-2 rounded mt-1">
+                    </div>
+                    <div>
+                        <label class="text-red-600">🟥 Rojas ($1.00 c/u)</label>
+                        <input type="number" name="rojas_local" min="0" value="{{ partido.rojas_local }}" class="w-full border p-2 rounded mt-1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow border">
+                <h3 class="font-bold border-b pb-2 mb-3 text-sm">Resumen Tarjetas: {{ partido.equipo_visitante.nombre }}</h3>
+                <div class="grid grid-cols-2 gap-4 text-xs font-bold">
+                    <div>
+                        <label class="text-amber-600">🟨 Amarillas ($0.50 c/u)</label>
+                        <input type="number" name="amarillas_visitante" min="0" value="{{ partido.amarillas_visitante }}" class="w-full border p-2 rounded mt-1">
+                    </div>
+                    <div>
+                        <label class="text-red-600">🟥 Rojas ($1.00 c/u)</label>
+                        <input type="number" name="rojas_visitante" min="0" value="{{ partido.rojas_visitante }}" class="w-full border p-2 rounded mt-1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OBSERVACIONES DEL PARTIDO -->
+        <div class="bg-white p-5 rounded-xl shadow border">
+            <h3 class="font-bold border-b pb-2 mb-3 text-sm text-gray-800">📝 Observaciones / Informe Arbitral y de Vocalía</h3>
+            <textarea name="observaciones" rows="3" placeholder="Detalle cualquier novedad, conducta antideportiva o incidente durante el encuentro..."
+                      class="w-full border p-2 rounded text-xs focus:ring-2 focus:ring-blue-500">{{ partido.observaciones or '' }}</textarea>
+        </div>
+
+        <!-- FIRMAS DE CONFORMIDAD -->
+        <div class="bg-white p-5 rounded-xl shadow border">
+            <h3 class="font-bold border-b pb-2 mb-4 text-sm text-gray-800">✍ Firmas de Conformidad (Capitanes)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold">
+                <div>
+                    <label class="block text-gray-600 mb-1">Capitán / Delegado ({{ partido.equipo_local.nombre }})</label>
+                    <input type="text" name="firma_local" value="{{ partido.firma_local or '' }}" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Capitán / Delegado ({{ partido.equipo_visitante.nombre }})</label>
+                    <input type="text" name="firma_visitante" value="{{ partido.firma_visitante or '' }}" required class="w-full border p-2 rounded">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition text-sm">
+            ✅ Finalizar Acta Oficial y Guardar Marcador
+        </button>
+    </form>
+</div>
+{% endblock %}

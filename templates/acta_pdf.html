@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acta de Partido - {{ partido.equipo_local.nombre }} vs {{ partido.equipo_visitante.nombre }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6 font-sans text-xs">
+
+    <!-- BOTONES DE IMPRESIÓN -->
+    <div class="max-w-4xl mx-auto mb-4 flex justify-between items-center no-print">
+        <a href="javascript:history.back()" class="text-blue-600 font-bold">← Volver</a>
+        <button onclick="window.print()" class="bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow">
+            🖨 Imprimir / Guardar como PDF
+        </button>
+    </div>
+
+    <!-- DOCUMENTO DEL ACTA -->
+    <div class="max-w-4xl mx-auto bg-white p-8 border border-gray-300 shadow-md rounded-xl">
+        <div class="text-center border-b pb-4 mb-4">
+            <h1 class="text-2xl font-black uppercase text-gray-800">LIGA DE FÚTBOL BARRIAL</h1>
+            <h2 class="text-sm font-bold text-gray-600">ACTA OFICIAL DE PARTIDO — FÚTBOL 7</h2>
+            <p class="text-xs text-gray-400">Fecha {{ partido.fecha_numero }} — Categoría {{ partido.genero }}</p>
+        </div>
+
+        <!-- ENCABEZADO Y DATOS DE PROGRAMACIÓN -->
+        <div class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded mb-4 border text-center font-semibold">
+            <div><b>Fecha:</b> {{ partido.dia_juego }}</div>
+            <div><b>Horario:</b> {{ partido.hora_inicio }} - {{ partido.hora_fin }}</div>
+            <div><b>Árbitro:</b> {{ partido.arbitro.nombre if partido.arbitro else 'N/A' }}</div>
+            <div><b>Vocalía:</b> {{ partido.equipo_vocal.nombre if partido.equipo_vocal else 'N/A' }}</div>
+        </div>
+
+        <!-- MARCADOR FINAL -->
+        <div class="flex justify-around items-center bg-slate-900 text-white p-4 rounded-lg my-4 text-center">
+            <div class="w-2/5 font-black text-base uppercase">{{ partido.equipo_local.nombre }}</div>
+            <div class="text-3xl font-black px-4 py-1 bg-white text-black rounded">{{ partido.goles_local }} - {{ partido.goles_visitante }}</div>
+            <div class="w-2/5 font-black text-base uppercase">{{ partido.equipo_visitante.nombre }}</div>
+        </div>
+
+        <!-- TARJETAS Y MULTAS -->
+        <div class="grid grid-cols-2 gap-4 my-4">
+            <div class="p-3 border rounded">
+                <h3 class="font-bold border-b pb-1 mb-1">{{ partido.equipo_local.nombre }}</h3>
+                <p>🟨 Amarillas: {{ partido.amarillas_local }} | 🟥 Rojas: {{ partido.rojas_local }}</p>
+                <p class="font-bold text-red-600 mt-1">Multa Total: ${{ "%.2f"|format(partido.multa_local) }}</p>
+            </div>
+            <div class="p-3 border rounded">
+                <h3 class="font-bold border-b pb-1 mb-1">{{ partido.equipo_visitante.nombre }}</h3>
+                <p>🟨 Amarillas: {{ partido.amarillas_visitante }} | 🟥 Rojas: {{ partido.rojas_visitante }}</p>
+                <p class="font-bold text-red-600 mt-1">Multa Total: ${{ "%.2f"|format(partido.multa_visitante) }}</p>
+            </div>
+        </div>
+
+        <!-- OBSERVACIONES -->
+        <div class="p-3 border rounded my-4 min-h-[60px]">
+            <b class="block border-b pb-1 mb-1">Observaciones del Informe:</b>
+            <p class="text-gray-700 italic">{{ partido.observaciones or 'Sin novedades registradas.' }}</p>
+        </div>
+
+  
+        <!-- FIRMAS -->
+        <div class="grid grid-cols-2 gap-12 mt-12 text-center">
+            <div class="border-t border-gray-400 pt-2 font-bold">
+                Firma Capitán {{ partido.equipo_local.nombre }}<br>
+                <span class="text-gray-500 font-normal">({{ partido.firma_local or 'Pendiente' }})</span>
+            </div>
+            <div class="border-t border-gray-400 pt-2 font-bold">
+                Firma Capitán {{ partido.equipo_visitante.nombre }}<br>
+                <span class="text-gray-500 font-normal">({{ partido.firma_visitante or 'Pendiente' }})</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

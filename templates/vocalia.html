@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-black text-gray-800">📋 Mesa de Vocalía</h1>
+        <p class="text-xs text-gray-500">Selecciona el partido en juego para registrar la planilla, goles, tarjetas y observaciones.</p>
+    </div>
+
+    <!-- LISTADO DE PARTIDOS PENDIENTES POR JUGAR -->
+    <div class="space-y-4">
+        {% for p in partidos %}
+            <div class="bg-white p-5 rounded-xl shadow border border-gray-200">
+                
+                <!-- ENCABEZADO DE TARJETA -->
+                <div class="flex justify-between items-center border-b pb-2 mb-3 text-xs">
+                    <span class="font-bold text-gray-500">
+                        Fecha {{ p.fecha_numero }} — {{ p.genero }} | 📅 {{ p.dia_juego }} ({{ p.hora_inicio }} - {{ p.hora_fin }})
+                    </span>
+                    <span class="bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                        {{ p.estado }}
+                    </span>
+                </div>
+
+                <!-- ENFRENTAMIENTO -->
+                <div class="flex justify-around items-center text-center my-3">
+                    <div class="w-2/5 font-bold text-base md:text-lg text-gray-800">
+                        {{ p.equipo_local.nombre }}
+                    </div>
+                    <div class="bg-slate-900 text-white font-black text-xl px-4 py-1 rounded-lg shadow">
+                        VS
+                    </div>
+                    <div class="w-2/5 font-bold text-base md:text-lg text-gray-800">
+                        {{ p.equipo_visitante.nombre }}
+                    </div>
+                </div>
+
+                <!-- DETALLES DE ASIGNACIÓN Y BOTÓN -->
+                <div class="flex flex-col sm:flex-row justify-between items-center border-t pt-3 mt-3 gap-3">
+                    <div class="flex gap-4 text-xs text-gray-600">
+                        <span>📌 Vocalía: <b class="text-gray-800">{{ p.equipo_vocal.nombre if p.equipo_vocal else 'Por definir' }}</b></span>
+                        <span>🏁 Árbitro: <b class="text-gray-800">{{ p.arbitro.nombre if p.arbitro else 'Por asignar' }}</b></span>
+                    </div>
+
+                    <!-- BOTÓN Llenar ACTA -->
+                    <a href="{{ url_for('llenar_acta', partido_id=p.id) }}" 
+                       class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg shadow transition text-center">
+                        ✍️ Abrir Mesa de Vocalía
+                    </a>
+                </div>
+
+            </div>
+        {% else %}
+            <div class="bg-white p-8 rounded-xl text-center text-gray-500 shadow border">
+                <p class="font-bold text-sm">No hay partidos pendientes programados en el calendario.</p>
+                <p class="text-xs text-gray-400 mt-1">Ingresa como administrador al panel para programar nuevos partidos.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
